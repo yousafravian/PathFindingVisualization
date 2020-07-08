@@ -1,11 +1,23 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {AppMesssageService} from './app-messsage.service';
+import {BrowserStack} from "protractor/built/driverProviders";
 
 declare var $: any;
 
 export interface Point {
   x: number;
   y: number;
+}
+
+export interface Path {
+  parent: {
+    x: number;
+    y: number;
+  };
+  child: {
+    x: number;
+    y: number;
+  };
 }
 
 enum Speed {
@@ -22,8 +34,10 @@ enum Speed {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  path: Array<Point>;
+  animationsPath: Array<Point>;
   wallPaths: Array<Point>;
+  actualPath: Array<Array<Point>>;
+
 
   title = 'ai-project';
 
@@ -50,12 +64,6 @@ export class AppComponent implements OnInit {
   };
 
   mapData = [
-    ['X', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', 'O', ' ', ' ', ' ', ' ', 'O', ' ', 'O', ' ', 'O', ' ', 'O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', 'O', ' ', 'O', ' ', ' ', 'O', ' ', 'O', ' ', 'O', ' ', 'O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -79,7 +87,13 @@ export class AppComponent implements OnInit {
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'Y']];
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']];
   directionRow = [-1, +1, 0, 0];
   directionCol = [0, 0, +1, -1];
 
@@ -108,7 +122,7 @@ export class AppComponent implements OnInit {
     while (rowQueue.length > 0 && colQueue.length > 0) {
       const tempR: number = rowQueue.shift();
       const tempC: number = colQueue.shift();
-      this.path.push({x: tempR, y: tempC});
+      this.animationsPath.push({x: tempR, y: tempC});
       // if (map[tempR][tempC] === 'Y') {
       if (tempR === end.x && tempC === end.y) {
         reached = true;
@@ -117,9 +131,11 @@ export class AppComponent implements OnInit {
       }
       this.getNeighboursOfCell(map, tempR, tempC, R, C, visited, rowQueue, colQueue);
     }
-    this.visualize(this.path);
+    this.visualize(this.animationsPath);
+    // this.colorPath(this.actualPath, undefined, i);
 
   }
+
 
   getNeighboursOfCell(map: string[][], tempR: number, tempC: number, R: number, C: number,
                       visited: Array<Array<boolean>>, rQ: Array<number>, cQ: Array<number>) {
@@ -146,6 +162,7 @@ export class AppComponent implements OnInit {
       rQ.push(newR);
       cQ.push(newC);
       visited[newR][newC] = true;
+      this.actualPath[newR][newC] = {x: tempR, y: tempC};
     }
   }
 
@@ -163,11 +180,34 @@ export class AppComponent implements OnInit {
 
   async visualize(path: Array<Point>) {
     // tslint:disable-next-line:prefer-for-of
+    // let i;
+    let final = 0;
     for (let i = 0; i < path.length; i++) {
       this.color(i).then(() => {
         this.list.children[path[i].x].children[path[i].y].classList.add('node-visited');
       });
+      final = i;
     }
+
+    console.log(`Final:${final}`)
+    let currentPoint = {x: this.dest.x, y: this.dest.y};
+    let count = 5;
+    while (currentPoint.x !== -1 && currentPoint.y !== -1) {
+
+      this.colorPath(currentPoint, count, final);
+      count += 5;
+      currentPoint = this.actualPath[currentPoint.x][currentPoint.y];
+    }
+
+
+  }
+
+  colorPath(currentPoint: Point, count: number, offset: number) {
+    setTimeout(() => {
+      console.log(currentPoint);
+      this.list.children[currentPoint.x].children[currentPoint.y].classList.add('path');
+      this.list.children[currentPoint.x].children[currentPoint.y].classList.remove('node-visited');
+    }, (count * 10) + (offset * this.speedValue));
   }
 
   color(time) {
@@ -179,8 +219,10 @@ export class AppComponent implements OnInit {
   }
 
   constructor(public message: AppMesssageService) {
-    this.path = new Array<Point>();
+    this.animationsPath = new Array<Point>();
     this.wallPaths = new Array<Point>();
+    this.resetActualPath();
+    console.log(this.mapData.length + ' :' + this.mapData[0].length);
   }
 
   clearDest() {
@@ -213,9 +255,12 @@ export class AppComponent implements OnInit {
 
     this.resetBtn.click((event) => {
       event.preventDefault();
-      this.path = new Array<Point>();
+      this.animationsPath = new Array<Point>();
+      this.actualPath = new Array<Array<Point>>();
+      this.resetActualPath();
+
       this.clearWalls(this.wallPaths);
-      console.log(this.path);
+      console.log(this.animationsPath);
       if (this.source.object && this.source.object.classList.contains('bg-success')) {
         this.clearSource();
       }
@@ -296,12 +341,13 @@ export class AppComponent implements OnInit {
             this.wallPaths.push({x: i, y: j});
           }
         });
-        this.list.children[i].children[j].addEventListener('mousedown', () => {
+        this.list.children[i].children[j].addEventListener('mousedown', (event) => {
+          event.preventDefault();
           if (this.isWallMode) {
             this.mousedown = true;
           }
         });
-        $(this.list.children[i].children[j]).click(function(event) {
+        $(this.list.children[i].children[j]).click(function (event) {
           const data = this.value.split(':');
           // tslint:disable-next-line:radix
           const row = parseInt(data[0]);
@@ -334,8 +380,6 @@ export class AppComponent implements OnInit {
 
       }
     }
-
-
   }
 
   checkWall(checked: boolean) {
@@ -348,5 +392,16 @@ export class AppComponent implements OnInit {
       this.mapData[point.x][point.y] = ' ';
     }
     this.wallPaths = new Array<Point>();
+  }
+
+  resetActualPath() {
+    this.actualPath = new Array<Array<Point>>(this.mapData.length);
+    for (let i = 0; i < this.actualPath.length; i++) {
+      this.actualPath[i] = new Array<Point>(this.mapData[0].length);
+      for (let j = 0; j < this.actualPath[i].length; j++) {
+        this.actualPath[i][j] = {x: -1, y: -1};
+
+      }
+    }
   }
 }
