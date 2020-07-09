@@ -48,6 +48,7 @@ export class AppComponent implements OnInit {
   resetBtn = null;
   searchBtn = null;
 
+  diagonalStepsAllowed = false;
   mode = 'Source';
   speed = Speed.Normal;
   speedValue = 25;
@@ -94,8 +95,11 @@ export class AppComponent implements OnInit {
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']];
-  directionRow = [-1, +1, 0, 0];
-  directionCol = [0, 0, +1, -1];
+  // directionRow = [-1, +1, 0, 0];
+  // directionCol = [0, 0, +1, -1];
+
+  directionRow = [-1, +1, 0, 0, -1, -1, +1, +1];
+  directionCol = [0, 0, +1, -1, -1, +1, +1, -1];
 
   Algo(map: string[][], start: Point, end: Point) {
     const rowQueue: Array<number> = new Array<number>();
@@ -141,7 +145,8 @@ export class AppComponent implements OnInit {
                       visited: Array<Array<boolean>>, rQ: Array<number>, cQ: Array<number>) {
     let newR = -1;
     let newC = -1;
-    for (let i = 0; i < 4; i++) {
+    const steps = (this.diagonalStepsAllowed) ? 8 : 4;
+    for (let i = 0; i < steps; i++) {
       newR = tempR + (this.directionRow)[i];
       newC = tempC + (this.directionCol)[i];
       // IF OUT OF BOUNDS
@@ -403,5 +408,10 @@ export class AppComponent implements OnInit {
 
       }
     }
+  }
+
+  onDiagonalModeClicked(checked: boolean) {
+    this.diagonalStepsAllowed = checked;
+    console.log(this.diagonalStepsAllowed);
   }
 }
