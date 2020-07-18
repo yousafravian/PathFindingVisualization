@@ -1,22 +1,11 @@
-/*
-div.main-div{
-
-    width: 100%;
-    display: flex;
-
-}
-div:not(.main-div){
-    width: 20px;
-    height: 20px;
-    border: 1px solid black;
-}
-*/
 
 
 td {
-  padding: 2px;
+  padding: 3px;
   border: 1px solid rgba(38, 139, 234, 0.49);
   transition: .1s ease-in-out;
+  width: 10px;
+  height: 10px;
 }
 
 
@@ -28,11 +17,7 @@ td:hover {
 }
 
 
-table {
 
-  width: 50vw !important;
-  height: 50vh !important;
-}
 
 .path {
   background-color: rgb(255, 255, 0);

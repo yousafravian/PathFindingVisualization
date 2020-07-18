@@ -1,6 +1,5 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {AppMesssageService} from './app-messsage.service';
-import {BrowserStack} from "protractor/built/driverProviders";
 
 declare var $: any;
 
@@ -9,22 +8,11 @@ export interface Point {
   y: number;
 }
 
-export interface Path {
-  parent: {
-    x: number;
-    y: number;
-  };
-  child: {
-    x: number;
-    y: number;
-  };
-}
 
 enum Speed {
   Slow = 'Slow',
   Normal = 'Normal',
   Fast = 'Fast'
-
 }
 
 
@@ -38,8 +26,8 @@ export class AppComponent implements OnInit {
   wallPaths: Array<Point>;
   actualPath: Array<Array<Point>>;
 
-
-  title = 'ai-project';
+  Rows = 50;
+  Column = 60;
 
 
   isWallMode = false;
@@ -49,6 +37,7 @@ export class AppComponent implements OnInit {
   searchBtn = null;
 
   diagonalStepsAllowed = false;
+  found = false;
   mode = 'Source';
   speed = Speed.Normal;
   speedValue = 25;
@@ -64,50 +53,17 @@ export class AppComponent implements OnInit {
     y: null
   };
 
-  mapData = [
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']];
-  // directionRow = [-1, +1, 0, 0];
-  // directionCol = [0, 0, +1, -1];
+  mapData: Array<Array<string>>;
 
   directionRow = [-1, +1, 0, 0, -1, -1, +1, +1];
   directionCol = [0, 0, +1, -1, -1, +1, +1, -1];
 
   Algo(map: string[][], start: Point, end: Point) {
+    this.found = false;
     const rowQueue: Array<number> = new Array<number>();
     const colQueue: Array<number> = new Array<number>();
     const sr = start.x;
     const sc = start.y;
-    const change = false;
-
 
     const R = map.length;
     const C = map[0].length;
@@ -130,7 +86,8 @@ export class AppComponent implements OnInit {
       // if (map[tempR][tempC] === 'Y') {
       if (tempR === end.x && tempC === end.y) {
         reached = true;
-        console.log(`Found at ${tempR}:${tempC}`);
+        // console.log(`Found at ${tempR}:${tempC}`);
+        this.found = true;
         break;
       }
       this.getNeighboursOfCell(map, tempR, tempC, R, C, visited, rowQueue, colQueue);
@@ -185,7 +142,6 @@ export class AppComponent implements OnInit {
 
   async visualize(path: Array<Point>) {
     // tslint:disable-next-line:prefer-for-of
-    // let i;
     let final = 0;
     for (let i = 0; i < path.length; i++) {
       this.color(i).then(() => {
@@ -193,10 +149,10 @@ export class AppComponent implements OnInit {
       });
       final = i;
     }
-
-    console.log(`Final:${final}`)
-    let currentPoint = {x: this.dest.x, y: this.dest.y};
     let count = 5;
+    // console.log(`Final:${final}`);
+    let currentPoint = {x: this.dest.x, y: this.dest.y};
+
     while (currentPoint.x !== -1 && currentPoint.y !== -1) {
 
       this.colorPath(currentPoint, count, final);
@@ -204,12 +160,19 @@ export class AppComponent implements OnInit {
       currentPoint = this.actualPath[currentPoint.x][currentPoint.y];
     }
 
+    if (!this.found) {
+      console.log('Not Found ---------------');
+      setTimeout(() => {
+        $('#modalFailure').modal();
+      }, (count * 10) + (final * this.speedValue));
+    }
+
 
   }
 
   colorPath(currentPoint: Point, count: number, offset: number) {
     setTimeout(() => {
-      console.log(currentPoint);
+      // console.log(currentPoint);
       this.list.children[currentPoint.x].children[currentPoint.y].classList.add('path');
       this.list.children[currentPoint.x].children[currentPoint.y].classList.remove('node-visited');
     }, (count * 10) + (offset * this.speedValue));
@@ -226,8 +189,14 @@ export class AppComponent implements OnInit {
   constructor(public message: AppMesssageService) {
     this.animationsPath = new Array<Point>();
     this.wallPaths = new Array<Point>();
+    this.mapData = new Array<Array<string>>(this.Rows);
+    for (let i = 0; i < this.Rows; i++) {
+      this.mapData[i] = new Array<string>(this.Column);
+      for (let j = 0; j < this.Column; j++) {
+        this.mapData[i][j] = ' ';
+      }
+    }
     this.resetActualPath();
-    console.log(this.mapData.length + ' :' + this.mapData[0].length);
   }
 
   clearDest() {
@@ -253,7 +222,6 @@ export class AppComponent implements OnInit {
 
     const me = this;
     me.list = document.getElementById('tbody');
-    console.log(me.list);
     me.resetBtn = $('#reset-btn');
     me.searchBtn = $('#search-btn');
 
@@ -265,7 +233,6 @@ export class AppComponent implements OnInit {
       this.resetActualPath();
 
       this.clearWalls(this.wallPaths);
-      console.log(this.animationsPath);
       if (this.source.object && this.source.object.classList.contains('bg-success')) {
         this.clearSource();
       }
@@ -285,6 +252,9 @@ export class AppComponent implements OnInit {
           if (this.list.children[i].children[j].classList.contains('wall')) {
             this.list.children[i].children[j].classList.remove('wall');
           }
+          if (this.list.children[i].children[j].classList.contains('path')) {
+            this.list.children[i].children[j].classList.remove('path');
+          }
         }
       }
     });
@@ -294,15 +264,15 @@ export class AppComponent implements OnInit {
         $('#modelId').modal();
         return;
       }
-      console.log(this.source);
-      console.log(this.dest);
+      // console.log(this.source);
+      // console.log(this.dest);
       // this.Algo(this.mapData, {x: 0, y: 1}, {x: 5, y:10});
       this.Algo(this.mapData, {x: this.source.x, y: this.source.y}, {x: this.dest.x, y: this.dest.y});
     });
     $('#options-dropdown > .dropdown-toggle').html(me.mode);
     $('#options-dropdown > .dropdown-menu > .dropdown-item').click(function test() {
       me.mode = $(this).attr('value');
-      console.log(me.mode);
+      // console.log(me.mode);
       $('#options-dropdown > .dropdown-toggle').html(me.mode);
 
     });
@@ -311,7 +281,7 @@ export class AppComponent implements OnInit {
     $('#options-speed > .dropdown-toggle').html('Speed ' + me.speed);
     $('#options-speed > .dropdown-menu > .dropdown-item').click(function test() {
       me.speed = $(this).attr('value');
-      console.log(me.speedValue);
+      // console.log(me.speedValue);
       $('#options-speed > .dropdown-toggle').html('Speed ' + me.speed);
 
       switch (me.speed) {
@@ -341,7 +311,7 @@ export class AppComponent implements OnInit {
 
         this.list.children[i].children[j].addEventListener('mouseenter', (event) => {
           if (this.mousedown) {
-            console.log('Enter Held' + event.target.classList.add('wall'));
+            event.target.classList.add('wall');
             this.mapData[i][j] = 'W';
             this.wallPaths.push({x: i, y: j});
           }
@@ -358,7 +328,7 @@ export class AppComponent implements OnInit {
           const row = parseInt(data[0]);
           // tslint:disable-next-line:radix
           const column = parseInt(data[1]);
-          console.log(`${row}:${column}`);
+          // console.log(`${row}:${column}`);
           if (me.mode === 'Source') {
             this.classList.add('bg-success');
             this.classList.add('animate__animated');
@@ -389,7 +359,7 @@ export class AppComponent implements OnInit {
 
   checkWall(checked: boolean) {
     this.isWallMode = checked;
-    console.log(checked);
+    // console.log(checked);
   }
 
   clearWalls(walls: Array<Point>) {
@@ -412,6 +382,30 @@ export class AppComponent implements OnInit {
 
   onDiagonalModeClicked(checked: boolean) {
     this.diagonalStepsAllowed = checked;
-    console.log(this.diagonalStepsAllowed);
+    // console.log(this.diagonalStepsAllowed);
+  }
+
+  generateRandomObstacles(genRandom: MouseEvent, number: number) {
+    genRandom.preventDefault();
+
+    let xx;
+    let yy;
+
+    for (let i = 0; i < number; i++) {
+      xx = Math.floor(Math.random() * ((this.Rows - 1) + 1));
+      yy = Math.floor(Math.random() * ((this.Column - 1) + 1));
+
+      if (this.source.x === xx && this.source.y === yy) {
+        continue;
+      }
+
+      if (this.dest.x === xx && this.dest.y === yy) {
+        continue;
+      }
+
+      this.wallPaths.push({x: xx, y: yy});
+      this.mapData[xx][yy] = 'W';
+      this.list.children[xx].children[yy].classList.add('wall');
+    }
   }
 }

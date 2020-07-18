@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>Algorithm.ts</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #ff79c6;}
+.s1 { color: #f8f8f2;}
+.s2 { color: #737fff;}
+.s3 { color: #36ffac;}
+.s4 { color: #bd93f9;}
+.s5 { color: #fff906;}
+.s6 { color: #f1fa8c;}
+</style>
+</head>
+<body bgcolor="#282a36">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Algorithm.ts</font>
+</center></td></tr></table>
+<pre><span class="s0">export class </span><span class="s1">BFS </span><span class="s2">{</span>
+
+  <span class="s1">map2 = </span><span class="s3">[]</span><span class="s1">;</span>
+  <span class="s1">directionRow = </span><span class="s3">[</span><span class="s1">-</span><span class="s4">1</span><span class="s1">, +</span><span class="s4">1</span><span class="s1">, </span><span class="s4">0</span><span class="s1">, </span><span class="s4">0</span><span class="s3">]</span><span class="s1">;</span>
+  <span class="s1">directionCol = </span><span class="s3">[</span><span class="s4">0</span><span class="s1">, </span><span class="s4">0</span><span class="s1">, +</span><span class="s4">1</span><span class="s1">, -</span><span class="s4">1</span><span class="s3">]</span><span class="s1">;</span>
+
+  <span class="s1">Algo</span><span class="s5">(</span><span class="s1">map: string</span><span class="s3">[][]</span><span class="s5">) </span><span class="s2">{</span>
+    <span class="s0">const </span><span class="s1">rowQueue: Array&lt;number&gt; = </span><span class="s0">new </span><span class="s1">Array&lt;number&gt;</span><span class="s5">()</span><span class="s1">;</span>
+    <span class="s0">const </span><span class="s1">colQueue: Array&lt;number&gt; = </span><span class="s0">new </span><span class="s1">Array&lt;number&gt;</span><span class="s5">()</span><span class="s1">;</span>
+    <span class="s0">const </span><span class="s1">sr = </span><span class="s4">0</span><span class="s1">;</span>
+    <span class="s0">const </span><span class="s1">sc = </span><span class="s4">0</span><span class="s1">;</span>
+
+    <span class="s0">const </span><span class="s1">change = </span><span class="s0">false</span><span class="s1">;</span>
+
+
+    <span class="s0">const </span><span class="s1">R = map.length;</span>
+    <span class="s0">const </span><span class="s1">C = map</span><span class="s3">[</span><span class="s4">0</span><span class="s3">]</span><span class="s1">.length;</span>
+    <span class="s0">const </span><span class="s1">visited: boolean</span><span class="s3">[][] </span><span class="s1">= </span><span class="s0">new </span><span class="s1">Array&lt;Array&lt;boolean&gt;&gt;</span><span class="s5">(</span><span class="s1">R</span><span class="s5">)</span><span class="s1">;</span>
+    <span class="s0">for </span><span class="s5">(</span><span class="s0">let </span><span class="s1">i = </span><span class="s4">0</span><span class="s1">; i &lt; R; i++</span><span class="s5">) </span><span class="s2">{</span>
+      <span class="s1">visited</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] </span><span class="s1">= </span><span class="s0">new </span><span class="s1">Array&lt;boolean&gt;</span><span class="s5">(</span><span class="s1">C</span><span class="s5">)</span><span class="s1">;</span>
+      <span class="s0">for </span><span class="s5">(</span><span class="s0">let </span><span class="s1">j = </span><span class="s4">0</span><span class="s1">; j &lt; C; j++</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s1">visited</span><span class="s3">[</span><span class="s1">i</span><span class="s3">][</span><span class="s1">j</span><span class="s3">] </span><span class="s1">= </span><span class="s0">false</span><span class="s1">;</span>
+      <span class="s2">}</span>
+    <span class="s2">}</span>
+    <span class="s0">let </span><span class="s1">reached = </span><span class="s0">false</span><span class="s1">;</span>
+    <span class="s1">rowQueue.push</span><span class="s5">(</span><span class="s1">sr</span><span class="s5">)</span><span class="s1">;</span>
+    <span class="s1">colQueue.push</span><span class="s5">(</span><span class="s1">sc</span><span class="s5">)</span><span class="s1">;</span>
+    <span class="s1">visited</span><span class="s3">[</span><span class="s1">sr</span><span class="s3">][</span><span class="s1">sc</span><span class="s3">] </span><span class="s1">= </span><span class="s0">true</span><span class="s1">;</span>
+
+    <span class="s0">while </span><span class="s5">(</span><span class="s1">rowQueue.length &gt; </span><span class="s4">0 </span><span class="s1">&amp;&amp; colQueue.length &gt; </span><span class="s4">0</span><span class="s5">) </span><span class="s2">{</span>
+      <span class="s0">const </span><span class="s1">tempR: number = rowQueue.shift</span><span class="s5">()</span><span class="s1">;</span>
+      <span class="s0">const </span><span class="s1">tempC: number = colQueue.shift</span><span class="s5">()</span><span class="s1">;</span>
+
+      <span class="s0">if </span><span class="s5">(</span><span class="s1">map</span><span class="s3">[</span><span class="s1">tempR</span><span class="s3">][</span><span class="s1">tempC</span><span class="s3">] </span><span class="s1">=== </span><span class="s6">'Y'</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s1">reached = </span><span class="s0">true</span><span class="s1">;</span>
+        <span class="s0">break</span><span class="s1">;</span>
+      <span class="s2">}</span>
+      <span class="s0">this</span><span class="s1">.getNeighboursOfCell</span><span class="s5">(</span><span class="s0">this</span><span class="s1">.map2, tempR, tempC, R, C, visited, rowQueue, colQueue</span><span class="s5">)</span><span class="s1">;</span>
+    <span class="s2">}</span>
+
+  <span class="s2">}</span>
+
+  <span class="s1">getNeighboursOfCell</span><span class="s5">(</span><span class="s1">map: string</span><span class="s3">[][]</span><span class="s1">, tempR: number, tempC: number, R: number, C: number,</span>
+                      <span class="s1">visited: Array&lt;Array&lt;boolean&gt;&gt;, rQ: Array&lt;number&gt;, cQ: Array&lt;number&gt;</span><span class="s5">) </span><span class="s2">{</span>
+    <span class="s0">let </span><span class="s1">newR = -</span><span class="s4">1</span><span class="s1">;</span>
+    <span class="s0">let </span><span class="s1">newC = -</span><span class="s4">1</span><span class="s1">;</span>
+    <span class="s0">for </span><span class="s5">(</span><span class="s0">let </span><span class="s1">i = </span><span class="s4">0</span><span class="s1">; i &lt; </span><span class="s4">4</span><span class="s1">; i++</span><span class="s5">) </span><span class="s2">{</span>
+      <span class="s1">newR = tempR + </span><span class="s5">(</span><span class="s0">this</span><span class="s1">.directionRow</span><span class="s5">)</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]</span><span class="s1">;</span>
+      <span class="s1">newC = tempC + </span><span class="s5">(</span><span class="s0">this</span><span class="s1">.directionCol</span><span class="s5">)</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]</span><span class="s1">;</span>
+      <span class="s0">if </span><span class="s5">(</span><span class="s1">newR &lt; </span><span class="s4">0 </span><span class="s1">|| newC &lt; </span><span class="s4">0</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s0">continue</span><span class="s1">;</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s5">(</span><span class="s1">newR &gt;= R || newC &gt;= C</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s0">continue</span><span class="s1">;</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s5">(</span><span class="s1">visited</span><span class="s3">[</span><span class="s1">newR</span><span class="s3">][</span><span class="s1">newC</span><span class="s3">]</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s0">continue</span><span class="s1">;</span>
+      <span class="s2">}</span>
+      <span class="s0">if </span><span class="s5">(</span><span class="s1">map</span><span class="s3">[</span><span class="s1">newR</span><span class="s3">][</span><span class="s1">newC</span><span class="s3">] </span><span class="s1">=== </span><span class="s6">'#'</span><span class="s5">) </span><span class="s2">{</span>
+        <span class="s0">continue</span><span class="s1">;</span>
+      <span class="s2">}</span>
+      <span class="s1">rQ.push</span><span class="s5">(</span><span class="s1">newR</span><span class="s5">)</span><span class="s1">;</span>
+      <span class="s1">cQ.push</span><span class="s5">(</span><span class="s1">newC</span><span class="s5">)</span><span class="s1">;</span>
+      <span class="s1">visited</span><span class="s3">[</span><span class="s1">newR</span><span class="s3">][</span><span class="s1">newC</span><span class="s3">] </span><span class="s1">= </span><span class="s0">true</span><span class="s1">;</span>
+    <span class="s2">}</span>
+  <span class="s2">}</span>
+
+<span class="s2">}</span>
+
+</pre>
+</body>
+</html>
