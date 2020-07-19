@@ -15,6 +15,11 @@ enum Speed {
   Fast = 'Fast'
 }
 
+enum availableAlgorithms {
+  bfs = 'BFS',
+  dfs = 'DFS'
+}
+
 
 @Component({
   selector: 'app-root',
@@ -22,6 +27,7 @@ enum Speed {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+  selectedAlgorithm: availableAlgorithms = availableAlgorithms.bfs;
   animationsPath: Array<Point>;
   wallPaths: Array<Point>;
   actualPath: Array<Array<Point>>;
@@ -128,19 +134,8 @@ export class AppComponent implements OnInit {
     }
   }
 
-  sleep(seconds) {
-    const e = new Date().getTime() + (seconds * 1000);
-    while (new Date().getTime() <= e) {
-    }
-  }
 
-  wait(ms: number) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
-
-  async visualize(path: Array<Point>) {
+  visualize(path: Array<Point>) {
     // tslint:disable-next-line:prefer-for-of
     let final = 0;
     for (let i = 0; i < path.length; i++) {
@@ -385,13 +380,13 @@ export class AppComponent implements OnInit {
     // console.log(this.diagonalStepsAllowed);
   }
 
-  generateRandomObstacles(genRandom: MouseEvent, number: number) {
+  generateRandomObstacles(genRandom: MouseEvent, howMuch: number) {
     genRandom.preventDefault();
 
     let xx;
     let yy;
 
-    for (let i = 0; i < number; i++) {
+    for (let i = 0; i < howMuch; i++) {
       xx = Math.floor(Math.random() * ((this.Rows - 1) + 1));
       yy = Math.floor(Math.random() * ((this.Column - 1) + 1));
 
@@ -407,5 +402,14 @@ export class AppComponent implements OnInit {
       this.mapData[xx][yy] = 'W';
       this.list.children[xx].children[yy].classList.add('wall');
     }
+  }
+
+  algoChange(algo: string) {
+    if (algo === availableAlgorithms.bfs) {
+      this.selectedAlgorithm = availableAlgorithms.bfs;
+    } else if (algo === availableAlgorithms.dfs) {
+      this.selectedAlgorithm = availableAlgorithms.dfs;
+    }
+    console.log(this.selectedAlgorithm);
   }
 }

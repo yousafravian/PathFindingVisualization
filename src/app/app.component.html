@@ -43,6 +43,14 @@
   </button>
   <div class="collapse navbar-collapse" id="collapsibleNavId">
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <li id="option-algo" class="nav-item dropdown">
+        <a #algoLabel class="nav-link dropdown-toggle" href="#" id="algoId" data-toggle="dropdown" aria-haspopup="true"
+           aria-expanded="false">BFS</a>
+        <div class="dropdown-menu" aria-labelledby="algoId">
+          <a class="dropdown-item" href="#" (click)="algoChange('BFS'); algoLabel.innerHTML = 'BFS'" value="BFS">BFS</a>
+          <a class="dropdown-item" href="#" (click)="algoChange('DFS'); algoLabel.innerHTML = 'DFS'" value="DFS">DFS</a>
+        </div>
+      </li>
       <li id="options-dropdown" class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="dropdownId" data-toggle="dropdown" aria-haspopup="true"
            aria-expanded="false">Select Source/Dest</a>
@@ -83,7 +91,7 @@
     <form class="form-inline my-2 my-lg-0">
       <button id="reset-btn" class="btn btn-danger my-2 my-sm-0 mr-2" type="submit">Reset</button>
       <button id="search-btn" class="btn btn-primary my-2 my-sm-0 mr-2" type="submit">Search</button>
-      <button #genRandom id="generate-btn" (click)="generateRandomObstacles($event,100)" class="btn btn-secondary my-2 my-sm-0" type="submit">Generate Random Obstacles</button>
+      <button #genRandom id="generate-btn" (click)="generateRandomObstacles($event,100)" class="btn btn-secondary my-2 my-sm-0" type="submit">Random Obstacles</button>
     </form>
   </div>
 </nav>
