@@ -89,9 +89,9 @@
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
-      <button id="reset-btn" class="btn btn-danger my-2 my-sm-0 mr-2" type="submit">Reset</button>
-      <button id="search-btn" class="btn btn-primary my-2 my-sm-0 mr-2" type="submit">Search</button>
-      <button #genRandom id="generate-btn" (click)="generateRandomObstacles($event,100)" class="btn btn-secondary my-2 my-sm-0" type="submit">Random Obstacles</button>
+      <button id="reset-btn" class="btn btn-danger my-2 my-sm-0 mr-2" [disabled]="this.running" type="submit">Reset</button>
+      <button id="search-btn" class="btn btn-primary my-2 my-sm-0 mr-2" [disabled]="this.running && this.found" type="submit">Search</button>
+      <button #genRandom id="generate-btn" (click)="generateRandomObstacles($event,100)" [disabled]="this.running" class="btn btn-secondary my-2 my-sm-0" type="submit">Random Obstacles</button>
     </form>
   </div>
 </nav>

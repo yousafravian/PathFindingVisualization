@@ -27,11 +27,32 @@ enum availableAlgorithms {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+
+  constructor(public message: AppMesssageService) {
+    this.animationsPath = new Array<Point>();
+    this.wallPaths = new Array<Point>();
+    this.mapData = new Array<Array<string>>(this.Rows);
+    for (let i = 0; i < this.Rows; i++) {
+      this.mapData[i] = new Array<string>(this.Column);
+      for (let j = 0; j < this.Column; j++) {
+        this.mapData[i][j] = ' ';
+      }
+    }
+    for (let i = 0; i < this.Rows; i++) {
+      this.visited[i] = new Array<boolean>(this.Column);
+      for (let j = 0; j < this.Column; j++) {
+        this.visited[i][j] = false;
+      }
+    }
+    this.resetActualPath();
+  }
+
   selectedAlgorithm: availableAlgorithms = availableAlgorithms.bfs;
   animationsPath: Array<Point>;
   wallPaths: Array<Point>;
   actualPath: Array<Array<Point>>;
 
+  running = false;
   Rows = 50;
   Column = 60;
 
@@ -64,7 +85,12 @@ export class AppComponent implements OnInit {
   directionRow = [-1, +1, 0, 0, -1, -1, +1, +1];
   directionCol = [0, 0, +1, -1, -1, +1, +1, -1];
 
-  Algo(map: string[][], start: Point, end: Point) {
+  visited: boolean[][] = new Array<Array<boolean>>(this.Rows);
+
+  dfsFound = false;
+
+
+  BFS(map: string[][], start: Point, end: Point) {
     this.found = false;
     const rowQueue: Array<number> = new Array<number>();
     const colQueue: Array<number> = new Array<number>();
@@ -73,18 +99,18 @@ export class AppComponent implements OnInit {
 
     const R = map.length;
     const C = map[0].length;
-    const visited: boolean[][] = new Array<Array<boolean>>(R);
+    /*const visited: boolean[][] = new Array<Array<boolean>>(R);
     for (let i = 0; i < R; i++) {
       visited[i] = new Array<boolean>(C);
       for (let j = 0; j < C; j++) {
         visited[i][j] = false;
       }
-    }
+    }*/
 
     let reached = false;
     rowQueue.push(sr);
     colQueue.push(sc);
-    visited[sr][sc] = true;
+    this.visited[sr][sc] = true;
     while (rowQueue.length > 0 && colQueue.length > 0) {
       const tempR: number = rowQueue.shift();
       const tempC: number = colQueue.shift();
@@ -96,7 +122,7 @@ export class AppComponent implements OnInit {
         this.found = true;
         break;
       }
-      this.getNeighboursOfCell(map, tempR, tempC, R, C, visited, rowQueue, colQueue);
+      this.getNeighboursOfCell(map, tempR, tempC, R, C, this.visited, rowQueue, colQueue);
     }
     this.visualize(this.animationsPath);
     // this.colorPath(this.actualPath, undefined, i);
@@ -161,8 +187,6 @@ export class AppComponent implements OnInit {
         $('#modalFailure').modal();
       }, (count * 10) + (final * this.speedValue));
     }
-
-
   }
 
   colorPath(currentPoint: Point, count: number, offset: number) {
@@ -170,6 +194,7 @@ export class AppComponent implements OnInit {
       // console.log(currentPoint);
       this.list.children[currentPoint.x].children[currentPoint.y].classList.add('path');
       this.list.children[currentPoint.x].children[currentPoint.y].classList.remove('node-visited');
+      if (this.actualPath[currentPoint.x][currentPoint.y].x === -1) this.running = false;
     }, (count * 10) + (offset * this.speedValue));
   }
 
@@ -179,19 +204,6 @@ export class AppComponent implements OnInit {
         resolve();
       }, this.speedValue * time);
     });
-  }
-
-  constructor(public message: AppMesssageService) {
-    this.animationsPath = new Array<Point>();
-    this.wallPaths = new Array<Point>();
-    this.mapData = new Array<Array<string>>(this.Rows);
-    for (let i = 0; i < this.Rows; i++) {
-      this.mapData[i] = new Array<string>(this.Column);
-      for (let j = 0; j < this.Column; j++) {
-        this.mapData[i][j] = ' ';
-      }
-    }
-    this.resetActualPath();
   }
 
   clearDest() {
@@ -222,6 +234,7 @@ export class AppComponent implements OnInit {
 
 
     this.resetBtn.click((event) => {
+      this.found = false;
       event.preventDefault();
       this.animationsPath = new Array<Point>();
       this.actualPath = new Array<Array<Point>>();
@@ -233,6 +246,12 @@ export class AppComponent implements OnInit {
       }
       if (this.dest.object && this.dest.object.classList.contains('bg-dark')) {
         this.clearDest();
+      }
+      for (let i = 0; i < this.Rows; i++) {
+        this.visited[i] = new Array<boolean>(this.Column);
+        for (let j = 0; j < this.Column; j++) {
+          this.visited[i][j] = false;
+        }
       }
       // tslint:disable-next-line:prefer-for-of
       for (let i = 0; i < me.list.children.length; i++) {
@@ -259,10 +278,35 @@ export class AppComponent implements OnInit {
         $('#modelId').modal();
         return;
       }
-      // console.log(this.source);
-      // console.log(this.dest);
-      // this.Algo(this.mapData, {x: 0, y: 1}, {x: 5, y:10});
-      this.Algo(this.mapData, {x: this.source.x, y: this.source.y}, {x: this.dest.x, y: this.dest.y});
+      this.animationsPath = new Array<Point>();
+      this.actualPath = new Array<Array<Point>>();
+      this.resetActualPath();
+      for (let i = 0; i < me.list.children.length; i++) {
+        // tslint:disable-next-line:prefer-for-of
+        for (let j = 0; j < me.list.children[i].children.length; j++) {
+          if (this.list.children[i].children[j].classList.contains('highlight')) {
+            this.list.children[i].children[j].classList.remove('highlight');
+          }
+          if (this.list.children[i].children[j].classList.contains('node-visited')) {
+            this.list.children[i].children[j].classList.remove('node-visited');
+          }
+          if (this.list.children[i].children[j].classList.contains('path')) {
+            this.list.children[i].children[j].classList.remove('path');
+          }
+        }
+      }
+      for (let i = 0; i < this.Rows; i++) {
+        this.visited[i] = new Array<boolean>(this.Column);
+        for (let j = 0; j < this.Column; j++) {
+          this.visited[i][j] = false;
+        }
+      }
+      this.running = true;
+      if (this.selectedAlgorithm === availableAlgorithms.bfs) {
+        this.BFS(this.mapData, {x: this.source.x, y: this.source.y}, {x: this.dest.x, y: this.dest.y});
+      } else {
+        this.startDfs(this.source);
+      }
     });
     $('#options-dropdown > .dropdown-toggle').html(me.mode);
     $('#options-dropdown > .dropdown-menu > .dropdown-item').click(function test() {
@@ -302,8 +346,6 @@ export class AppComponent implements OnInit {
       for (let j = 0; j < me.list.children[i].children.length; j++) {
         // console.log()
         $(this.list.children[i].children[j]).val(i + ':' + j);
-
-
         this.list.children[i].children[j].addEventListener('mouseenter', (event) => {
           if (this.mousedown) {
             event.target.classList.add('wall');
@@ -324,7 +366,7 @@ export class AppComponent implements OnInit {
           // tslint:disable-next-line:radix
           const column = parseInt(data[1]);
           // console.log(`${row}:${column}`);
-          if (me.mode === 'Source') {
+          if (me.mode === 'Source' && !this.classList.contains('wall')) {
             this.classList.add('bg-success');
             this.classList.add('animate__animated');
             this.classList.add('animate__headShake');
@@ -335,7 +377,7 @@ export class AppComponent implements OnInit {
             me.source.x = row;
             me.source.y = column;
 
-          } else {
+          } else if (!this.classList.contains('wall')) {
             this.classList.add('bg-dark');
             this.classList.add('animate__animated');
             this.classList.add('animate__headShake');
@@ -354,7 +396,6 @@ export class AppComponent implements OnInit {
 
   checkWall(checked: boolean) {
     this.isWallMode = checked;
-    // console.log(checked);
   }
 
   clearWalls(walls: Array<Point>) {
@@ -412,4 +453,91 @@ export class AppComponent implements OnInit {
     }
     console.log(this.selectedAlgorithm);
   }
+
+  DFS(cell) {
+
+    // printMap();
+    // console.log('\n\n\n');
+
+    // if (start.x === end.x && start.y === end.y) {
+    //   return;
+    // }
+    if (this.dfsFound) {
+      return;
+    }
+    const steps = (this.diagonalStepsAllowed) ? 8 : 4;
+    // let tempDirX = this.shuffle(this.directionRow);
+    // let tempDirY = this.shuffle(this.directionCol);
+    for (let i = 0; i < steps && !this.dfsFound; i++) {
+      const newR = cell.x + this.directionRow[i];
+      const newC = cell.y + this.directionCol[i];
+      // console.log(`AT: ${cell.x}:${cell.y}`);
+      // console.log(`Trying: ${newR}:${newC}`);
+      // IF OUT OF BOUNDS
+      if (newR < 0 || newC < 0) {
+        // console.log('Out of bounds');
+        continue;
+      }
+      if (newR >= this.mapData.length || newC >= this.mapData[0].length) {
+        // console.log('Out of bounds');
+        continue;
+      }
+      // IF WALL ENCOUNTERED OR VISITED
+
+      if (this.visited[newR][newC]) {
+        // console.log('visited');
+        continue;
+      }
+      if (this.mapData[newR][newC] === 'W') {
+        // console.log('isWall');
+        continue;
+      }
+      if (newR === this.dest.x && newC === this.dest.y) {
+        console.log(`Found at: ${newR}:${newC}`)
+        this.found = true;
+        // console.log('Found');
+        // continue;
+        this.dfsFound = true;
+      }
+
+      // stack.push({x: newR, y: newC});
+      this.visited[newR][newC] = true;
+      this.actualPath[newR][newC] = {x: cell.x, y: cell.y};
+      this.animationsPath.push({x: cell.x, y: cell.y});
+      // console.log(`Discovered: ${newR}:${newC}`);
+
+      // console.log(`Calling for: ${newR}:${newC}`)
+      this.DFS({x: newR, y: newC});
+
+    }
+  }
+
+  startDfs(start: Point) {
+    this.dfsFound = false;
+    this.visited[start.x][start.y] = true;
+    this.DFS(start);
+    this.visualize(this.animationsPath);
+    // console.log(this.animationsPath);
+    // console.log(this.actualPath);
+  }
+
+  shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
 }
